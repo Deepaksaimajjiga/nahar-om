@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'go.apps.GoConfig',
 ]
 
 MIDDLEWARE = [
@@ -48,9 +49,18 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
-
+AUTH_USER_MODEL = "go.CustomUser"
 ROOT_URLCONF = 'deeptier.urls'
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "vickytilotiasmtp@gmail.com"
+EMAIL_HOST_PASSWORD = "password"
+
+# default email address
+DEFAULT_FROM_EMAIL = "vickytilotiasmtp@gmail.com"
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
