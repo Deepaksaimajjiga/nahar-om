@@ -21,6 +21,10 @@ from django.utils.html import strip_tags
 from .models import *
 from django.core.mail import EmailMessage
 
+from django.utils.crypto import get_random_string
+from .models import *
+
+
 
 def SendEmail(link, purpose, email, attachment_path=None):
     """
@@ -28,7 +32,7 @@ def SendEmail(link, purpose, email, attachment_path=None):
 
     Parameters:
     - link (str): The referral link to be included in the email.
-    - purpose (str): The purpose of the email, used to select the template.
+    - purpose (str): The purpose of the email, used to select the template. 
     - email (str): The recipient's email address.
     - attachment_path (str, optional): The file path of the attachment if any.
     """
@@ -57,3 +61,22 @@ def SendEmail(link, purpose, email, attachment_path=None):
     except Exception as e:
         print(f"Email not sent {e}")
         return "Not Sent"
+    
+def generate_voucher():
+    # Generates a unique voucher code
+    return Voucher.objects.create(
+        code=get_random_string(8),
+        discount_amount=10.00,
+    )
+
+def handle_referral(referred_user, referred_by):
+    # Create referral relationship
+    ReferalInfo.objects.create(uid=referred_user, refered_by=referred_by)
+
+    # Generate vouchers for both users
+    referred_user_voucher = generate_voucher()
+    referred_by_voucher = generate_voucher()
+
+    # Add vouchers to their wallets
+    referred_user.referral_wallet.vouchers.add(referred_user_voucher)
+    referred_by.referral_wallet.vouchers.add(referred_by_voucher)
