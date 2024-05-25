@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from .models import *
+from .template import *
 from .utility import SendEmail
 from rest_framework.response import Response
 from rest_framework.views import APIView
