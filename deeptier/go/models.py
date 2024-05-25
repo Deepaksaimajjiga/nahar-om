@@ -4,6 +4,9 @@ import random, string
 from .user_manager import UserManager
 import os
 from django.core.exceptions import ValidationError
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
 # Create your models here.
 class CustomUser(AbstractUser):
     """
@@ -61,27 +64,49 @@ class CustomUser(AbstractUser):
         else:
             return self.uid
 
+class Voucher(models.Model):
+    # referral = models.ForeignKey(ReferalInfo, on_delete=models.CASCADE)
+    code = models.CharField(max_length=100, unique=True)
+    discount_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    is_redeemed = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
 
 class ReferalInfo(models.Model):
     """
     This model helps to store the referral information.
     Sellers can refer a new seller and based on that they may gets some benefits
     """
+    voucher = models.ForeignKey(Voucher,null=True,blank = True, on_delete=models.CASCADE)
 
-    uid = models.OneToOneField(
+    referred_user = models.OneToOneField(
         CustomUser,
         primary_key=True,
         on_delete=models.CASCADE,
         related_name="refered_to_user",
     )
-    refered_by = models.ForeignKey(
+    referred_by = models.ForeignKey(
         CustomUser, on_delete=models.DO_NOTHING, related_name="refered_by_user"
     )
     created_at = models.DateTimeField(auto_now_add=True)
     modified_at = models.DateTimeField(auto_now=True)
 
     def _str_(self):
-        return f"{self.uid}"
+        return f"{self.uid}"   
+
+# class ReferralWallet(models.Model):
+#     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+#     vouchers = models.ForeignKey(Voucher,)
+
+#     def __str__(self):
+#         return f"{self.user}'s Referral Wallet"
+    
+#     @staticmethod
+#     def pre_delete_referral_wallet(sender, instance, **kwargs):
+#         # Delete vouchers associated with the referral wallet
+#         instance.vouchers.clear()
+
+# Connect pre_delete_referral_wallet method to pre_delete signal of ReferralWallet
+# models.signals.pre_delete.connect(ReferralWallet.pre_delete_referral_wallet, sender=ReferralWallet)
     
 class EmailTemplate(models.Model):
     purpose = models.CharField(max_length=255, unique=True)
